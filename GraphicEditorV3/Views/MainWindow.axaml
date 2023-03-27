@@ -57,7 +57,7 @@
 			<Button Name="buttonClear" HorizontalContentAlignment="Center" Width="170" Content="Сброс" Command="{Binding ResetCommand}" />
 		</WrapPanel>
 		<Border BorderBrush="Black" BorderThickness="2" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
-			<ItemsControl Items="{Binding ShapesIn}">
+			<ItemsControl PointerPressed="PointerPressedOncanvas" Items="{Binding ShapesIn}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<Canvas Name="canvas">

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
@@ -28,10 +29,66 @@ namespace GraphicEditor.Views
 {
     public partial class MainWindow : Window
     {
+        private Point pointPointerPressed;
+        private Point pointerPositionIntoShape;
         public MainWindow()
         {
             InitializeComponent();
         }
+
+        public void PointerPressedOncanvas(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
+        {
+            pointPointerPressed = pointerPressedEventArgs.GetPosition(this.GetVisualDescendants().OfType<Canvas>().FirstOrDefault());
+            if (pointerPressedEventArgs.Source is Shape shape)
+            {
+                pointerPositionIntoShape = pointerPressedEventArgs.GetPosition(shape);
+                this.PointerMoved += PointerMoveDragShape;
+                this.PointerReleased += PointerPressedReleasedDragShape;
+            }
+        }
+        private void PointerMoveDragShape(object? sender, PointerEventArgs pointerEventArgs)
+        {
+            if (DataContext is MainWindowViewModel mainWindowViewModel)
+            {
+                if (pointerEventArgs.Source is Shape shape)
+                {
+                    Point currentPointerPosition = pointerEventArgs.GetPosition(this.GetVisualDescendants().OfType<Canvas>().FirstOrDefault());
+                    if (shape is Rectangle myRectangle)
+                    {
+                        myRectangle.Margin = new Thickness(currentPointerPosition.X - pointerPositionIntoShape.X, currentPointerPosition.Y - pointerPositionIntoShape.Y);
+                        mainWindowViewModel.ShapesOut[mainWindowViewModel.ShapesIn.IndexOf(myRectangle)].stp = (currentPointerPosition.X - pointerPositionIntoShape.X).ToString() + "," + (currentPointerPosition.Y - pointerPositionIntoShape.Y).ToString();
+                    }
+                    if (shape is Ellipse myEllipse)
+                    {
+                        myEllipse.Margin = new Thickness(currentPointerPosition.X - pointerPositionIntoShape.X, currentPointerPosition.Y - pointerPositionIntoShape.Y);
+                        mainWindowViewModel.ShapesOut[mainWindowViewModel.ShapesIn.IndexOf(myEllipse)].stp = (currentPointerPosition.X - pointerPositionIntoShape.X).ToString() + "," + (currentPointerPosition.Y - pointerPositionIntoShape.Y).ToString();
+                    }
+                    if (shape is Polygon myPolygon)
+                    {
+                        myPolygon.Margin = new Thickness(currentPointerPosition.X - pointerPositionIntoShape.X, currentPointerPosition.Y - pointerPositionIntoShape.Y);
+                    }
+                    if (shape is Polyline myPolyline)
+                    {
+                        myPolyline.Margin = new Thickness(currentPointerPosition.X - pointerPositionIntoShape.X, currentPointerPosition.Y - pointerPositionIntoShape.Y);
+                    }
+                    if (shape is Avalonia.Controls.Shapes.Path myPath)
+                    {
+                        myPath.Margin = new Thickness(currentPointerPosition.X - pointerPositionIntoShape.X, currentPointerPosition.Y - pointerPositionIntoShape.Y);
+                    }
+                    if (shape is Line myLine)
+                    {
+                        myLine.Margin = new Thickness(currentPointerPosition.X - pointerPositionIntoShape.X, currentPointerPosition.Y - pointerPositionIntoShape.Y);
+                    }
+                }
+            }
+        }
+
+        private void PointerPressedReleasedDragShape(object? sender, PointerEventArgs pointerEventArgs) 
+        {
+            this.PointerMoved -= PointerMoveDragShape;
+            this.PointerReleased -= PointerPressedReleasedDragShape;
+        }
+
         public async void OpenJsonFileDialogButtonClick(object sender, RoutedEventArgs args)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
