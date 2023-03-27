@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			xmlns:vm="using:GraphicEditor.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			xmlns:localM="clr-namespace:GraphicEditor.Models"
+        mc:Ignorable="d" d:DesignWidth="1680" d:DesignHeight="800"
+		Height="800" Width="1680"
+        x:Class="GraphicEditor.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="GraphicEditorByPsixoforkk">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+	
+	<Window.DataTemplates>
+		<DataTemplate DataType="{x:Type localM:MyShapeModels}">
+			<Grid ColumnDefinitions="*, 20">
+				<TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding shapeName}" />
+				<Button Grid.Column="1" Name="buttonDeleteShape" VerticalAlignment="Center" HorizontalAlignment="Right" Click="DeleteShape" >
+					<Image Source="/Assets/trashcan.png" Height="16" Width="16" />
+				</Button>
+			</Grid>
+		</DataTemplate>
+	</Window.DataTemplates>
+
+	<Grid ColumnDefinitions="1*, 3*, 0.8*" RowDefinitions="0.15*, 3* 0.15*">
+		<WrapPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0">
+			<Menu>
+				<MenuItem Name="menuExport" Header="Экспортировать">
+					<MenuItem Header="Экспортировать в png" Click="SavePngFileDialogButtonClick" />
+					<MenuItem Header="Экспортировать в xml" Click="SaveXmlFileDialogButtonClick"/>
+					<MenuItem Header="Экспортировать в json" Click="SaveJsonFileDialogButtonClick"/>
+				</MenuItem>
+			</Menu>
+			<Menu>
+				<MenuItem Name="menuImport" Header="Импортировать">
+					<MenuItem Header="Импортировать из xml" Click="OpenXmlFileDialogButtonClick"/>
+					<MenuItem Header="Импортировать из json" Click="OpenJsonFileDialogButtonClick"/>
+				</MenuItem>
+			</Menu>
+		</WrapPanel>
+		<Border BorderBrush="Black" BorderThickness="2" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"/>
+		<StackPanel Grid.Column="0" Grid.Row="1">
+			<ComboBox Name="comboBoxShape" Width="350" SelectedIndex="0" SelectedItem="{Binding Content}" Items="{Binding ViewModelCollection}">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Header}"/>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+			<ContentControl Content="{Binding Content}" HorizontalContentAlignment="Left"/>
+		</StackPanel>
+		<WrapPanel Grid.Column="0" Grid.Row="2">
+			<Button Name="buttonAdd" HorizontalContentAlignment="Center" Margin="3 0" Width="170" Content="Добавить" Command="{Binding AddButton}" />
+			<Button Name="buttonClear" HorizontalContentAlignment="Center" Width="170" Content="Сброс" Command="{Binding ResetCommand}" />
+		</WrapPanel>
+		<Border BorderBrush="Black" BorderThickness="2" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
+			<ItemsControl Items="{Binding ShapesIn}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<Canvas Name="canvas">
+						</Canvas>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+			</ItemsControl>
+		</Border>
+		<ListBox Name="listBoxShapes" SelectedItem="{Binding SelectedLBItem}" Items="{Binding ShapesOut}" Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="2">
+		</ListBox>
+	</Grid>
+
+</Window>

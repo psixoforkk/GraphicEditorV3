@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GraphicEditor.Views.Pages.PolygonView">
+	<UserControl.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="FontSize" Value="12" />
+		</Style>
+	</UserControl.Styles>
+	<Grid ColumnDefinitions="*,  *" RowDefinitions="*, *, *, *, *, *, *, *, *" Margin="10 10">
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="0" Text="Имя:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="1" Text="Точки:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="2" Text="Цвет линии:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="3" Text="Толщина линии:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="4" Text="Цвет заливки:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="5" Text="Угол поворота:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="6" Text="Центр:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="7" Text="Scale:" />
+		<TextBlock Margin="10 10" Grid.Column="0" Grid.Row="8" Text="Skew:" />
+		<TextBox Name="textBoxName" Text="{Binding $parent[Window].DataContext.NameText}" Width="200" Margin="28 5" Grid.Column="1" Grid.Row="0" />
+		<TextBox Name="textBoxPoints" Text="{Binding $parent[Window].DataContext.PolyLineText}" Width="200" Margin="28 5" Grid.Column="1" Grid.Row="1" />
+		<ComboBox Name="comboBoxColor" SelectedIndex="{Binding $parent[Window].DataContext.GetIndex}" Items="{Binding $parent[Window].DataContext.ListOfBrushes}" Width="200" Margin="10 5" Grid.Column="1" Grid.Row="2">
+			<ComboBox.ItemTemplate>
+				<DataTemplate>
+					<Rectangle Fill="{Binding Name}" Height="20" Width="180" />
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</ComboBox>
+		<NumericUpDown Name="numericUpDownStroke" Text="{Binding $parent[Window].DataContext.NumericUpDownText}" Value="{Binding $parent[Window].DataContext.NumericUpDownText}" Minimum="1" Width="200" Margin="28 5" Grid.Column="1" Grid.Row="3" />
+		<ComboBox Name="comboBoxFillColor" SelectedIndex="{Binding $parent[Window].DataContext.GetFillIndex}" Items="{Binding $parent[Window].DataContext.ListOfBrushes}" Width="200" Margin="10 5" Grid.Column="1" Grid.Row="4">
+			<ComboBox.ItemTemplate>
+				<DataTemplate>
+					<Rectangle Fill="{Binding Name}" Height="20" Width="180" />
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</ComboBox>
+		<TextBox Width="200" Margin="28 5" Text="{Binding $parent[Window].DataContext.RotateTransformAngleDegs}" Name="textBoxRenderTransformAngle" Grid.Column="1" Grid.Row="5"/>
+		<TextBox Width="200" Margin="28 5" Text="{Binding $parent[Window].DataContext.RotateTransformCenterXYs}" Name="textBoxRotateCenter" Grid.Column="1" Grid.Row="6"/>
+		<TextBox Width="200" Margin="28 5" Text="{Binding $parent[Window].DataContext.ScaleTransformXY}" Name="textBoxScaleTransform" Grid.Column="1" Grid.Row="7"/>
+		<TextBox Width="200" Margin="28 5" Text="{Binding $parent[Window].DataContext.SkewTransformXY}" Name="textBoxSkewTransform" Grid.Column="1" Grid.Row="8"/>
+	</Grid>
+</UserControl>
