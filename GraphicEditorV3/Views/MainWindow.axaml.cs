@@ -32,14 +32,6 @@ namespace GraphicEditor.Views
         {
             InitializeComponent();
         }
-        public void DeleteShape(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is MainWindowViewModel mainWindowViewModel)
-            {
-                var but = this.GetVisualDescendants().OfType<ListBox>().Where(but => but.Name.Equals("listBoxShapes")).FirstOrDefault();
-                mainWindowViewModel.GetSelectedItemIndex = but.SelectedIndex;
-            }
-        }
         public async void OpenJsonFileDialogButtonClick(object sender, RoutedEventArgs args)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();

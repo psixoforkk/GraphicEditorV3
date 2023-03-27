@@ -18,7 +18,7 @@
 		<DataTemplate DataType="{x:Type localM:MyShapeModels}">
 			<Grid ColumnDefinitions="*, 20">
 				<TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding shapeName}" />
-				<Button Grid.Column="1" Name="buttonDeleteShape" VerticalAlignment="Center" HorizontalAlignment="Right" Click="DeleteShape" >
+				<Button Grid.Column="1" Name="buttonDeleteShape" VerticalAlignment="Center" HorizontalAlignment="Right" Command="{Binding $parent[Window].DataContext.DeleteCommand}" CommandParameter="{Binding}" >
 					<Image Source="/Assets/trashcan.png" Height="16" Width="16" />
 				</Button>
 			</Grid>

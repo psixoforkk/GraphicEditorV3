@@ -28,10 +28,9 @@ namespace GraphicEditor.ViewModels
         private ObservableCollection<ViewModelBase> viewModelCollection;
         public ObservableCollection<MyColor> ListOfBrushes { get; set; } = new ObservableCollection<MyColor>();
         public MyShapeModels selectedLBItem;
-        public int getSelectedItemIndex;
         public ReactiveCommand<Unit, Unit> AddButton { get; }
         public ReactiveCommand<Unit, Unit> ResetCommand { get; }
-        public ReactiveCommand<Unit, Unit> DeleteShape { get; }
+        public ReactiveCommand<MyShapeModels, MyShapeModels> DeleteCommand { get; }
         private bool selection_flag;
         private bool color_flag;
         private bool fcolor_flag;
@@ -108,6 +107,12 @@ namespace GraphicEditor.ViewModels
                 GetFillIndex = 1;
                 GetIndex = 1;
                 NumericUpDownText = 1;
+            });
+            DeleteCommand = ReactiveCommand.Create<MyShapeModels, MyShapeModels>(x =>
+            {
+                ShapesIn.RemoveAt(ShapesOut.IndexOf(x));
+                ShapesOut.Remove(x);
+                return null; 
             });
         }
         private int CheckName(string name)
@@ -419,19 +424,6 @@ namespace GraphicEditor.ViewModels
         {
             get { return path; }
             set { this.RaiseAndSetIfChanged(ref path, value); }
-        }
-        public int GetSelectedItemIndex
-        {
-            get { return getSelectedItemIndex; }
-            set 
-            {
-                this.RaiseAndSetIfChanged(ref getSelectedItemIndex, value);
-                if (selectedLBItem != null)
-                {
-                    ShapesOut.RemoveAt(getSelectedItemIndex);
-                    ShapesIn.RemoveAt(getSelectedItemIndex);
-                }
-            }
         }
         public MyShapeModels SelectedLBItem
         {
