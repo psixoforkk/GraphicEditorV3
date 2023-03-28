@@ -57,14 +57,16 @@
 			<Button Name="buttonClear" HorizontalContentAlignment="Center" Width="170" Content="Сброс" Command="{Binding ResetCommand}" />
 		</WrapPanel>
 		<Border BorderBrush="Black" BorderThickness="2" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
-			<ItemsControl PointerPressed="PointerPressedOncanvas" Items="{Binding ShapesIn}">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<Canvas Name="canvas">
-						</Canvas>
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-			</ItemsControl>
+			<ScrollViewer DragDrop.AllowDrop="True">
+				<ItemsControl PointerPressed="PointerPressedOncanvas" Items="{Binding ShapesIn}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<Canvas Width="{Binding $parent[ScrollViewer].Width}" Height="{Binding $parent[ScrollViewer].Height}" Name="canvas">
+							</Canvas>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</ScrollViewer>
 		</Border>
 		<ListBox Name="listBoxShapes" SelectedItem="{Binding SelectedLBItem}" Items="{Binding ShapesOut}" Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" BorderBrush="Black" BorderThickness="2">
 		</ListBox>

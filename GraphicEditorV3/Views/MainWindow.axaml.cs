@@ -34,6 +34,7 @@ namespace GraphicEditor.Views
         public MainWindow()
         {
             InitializeComponent();
+            AddHandler(DragDrop.DropEvent, Drop);
         }
 
         public void PointerPressedOncanvas(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
@@ -82,7 +83,27 @@ namespace GraphicEditor.Views
                 }
             }
         }
-
+        private void Drop(object sender, DragEventArgs dragEventArgs)
+        {
+            if (dragEventArgs.Data.Contains(DataFormats.FileNames) == true)
+            {
+                string? fileName = dragEventArgs.Data.GetFileNames()?.FirstOrDefault();
+                    if (DataContext is MainWindowViewModel mainWindowViewModel)
+                    {
+                        if (fileName != null)
+                        {
+                            if (System.IO.Path.GetExtension(fileName) == ".json")
+                            {
+                                OpenJSON(fileName, mainWindowViewModel);
+                            }
+                            if (System.IO.Path.GetExtension(fileName) == ".xml")
+                            {
+                                OpenXML(fileName, mainWindowViewModel);
+                            }
+                        }
+                    }
+            }
+        }
         private void PointerPressedReleasedDragShape(object? sender, PointerEventArgs pointerEventArgs) 
         {
             this.PointerMoved -= PointerMoveDragShape;
@@ -97,122 +118,7 @@ namespace GraphicEditor.Views
             {
                 if (result != null)
                 {
-                    using (FileStream fs = new FileStream(result[0], FileMode.Open))
-                    {
-                        byte[] buffer = new byte[fs.Length];
-                        fs.Read(buffer, 0, buffer.Length);
-                        string jsonText = Encoding.Default.GetString(buffer);
-                        mainWindowViewModel.ShapesIn.Clear();
-                        mainWindowViewModel.ShapesOut.Clear();
-                        List<MyShapeModels> newList;
-                        newList = JsonSerializer.Deserialize<List<MyShapeModels>>(jsonText)!;
-                        foreach (MyShapeModels gger in newList)
-                        {
-                            mainWindowViewModel.ShapesOut.Add(gger);
-                            TransformGroup newGroup = new TransformGroup();
-                            RotateTransform newRotate = new RotateTransform();
-                            ScaleTransform newScale = new ScaleTransform();
-                            SkewTransform newSkew = new SkewTransform();
-                            newSkew.AngleX = gger.skewX;
-                            newSkew.AngleY = gger.skewY;
-                            newScale.ScaleX = gger.scaleX;
-                            newScale.ScaleY = gger.scaleY;
-                            newRotate.CenterX = gger.rotX;
-                            newRotate.CenterY = gger.rotY;
-                            newRotate.Angle = gger.rotAngle;
-                            newGroup.Children.Add(newRotate);
-                            newGroup.Children.Add(newScale);
-                            newGroup.Children.Add(newSkew);
-                            if (gger.type == "line")
-                            {
-                                Line newShape = new Line
-                                {
-                                    RenderTransform = newGroup,
-                                    StartPoint = Avalonia.Point.Parse(gger.stp),
-                                    EndPoint = Avalonia.Point.Parse(gger.enp),
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk,
-
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "rectangle")
-                            {
-                                Rectangle newShape = new Rectangle
-                                {
-                                    RenderTransform = newGroup,
-                                    Margin = Avalonia.Thickness.Parse(gger.stp),
-                                    Width = int.Parse(gger.rctheight),
-                                    Height = int.Parse(gger.rctwidth),
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "ellipse")
-                            {
-                                Ellipse newShape = new Ellipse
-                                {
-                                    RenderTransform = newGroup,
-                                    Margin = Avalonia.Thickness.Parse(gger.stp),
-                                    Width = int.Parse(gger.rctheight),
-                                    Height = int.Parse(gger.rctwidth),
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "pthshape")
-                            {
-                                Avalonia.Controls.Shapes.Path newShape = new Avalonia.Controls.Shapes.Path
-                                {
-                                    RenderTransform = newGroup,
-                                    Data = Geometry.Parse(gger.pthdata),
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "polyline")
-                            {
-                                List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
-                                string[] words = gger.plylinetext.Split(' ');
-                                foreach (string word in words)
-                                {
-                                    listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
-                                }
-                                Polyline newShape = new Polyline
-                                {
-                                    RenderTransform = newGroup,
-                                    Points = listOfPolyLinePoints,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "polygon")
-                            {
-                                List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
-                                string[] words = gger.plylinetext.Split(' ');
-                                foreach (string word in words)
-                                {
-                                    listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
-                                }
-                                Polyline newShape = new Polyline
-                                {
-                                    RenderTransform = newGroup,
-                                    Points = listOfPolyLinePoints,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                        }
-                    }
+                    OpenJSON(result[0], mainWindowViewModel);
                 }
             }
         }
@@ -224,120 +130,7 @@ namespace GraphicEditor.Views
             {
                 if (result != null)
                 {
-                    mainWindowViewModel.ShapesOut.Clear();
-                    mainWindowViewModel.ShapesIn.Clear();
-                    List<MyShapeModels> newList;
-                    XmlSerializer xs = new XmlSerializer(typeof(List<MyShapeModels>));
-                    using (XmlReader reader = XmlReader.Create(result[0]))
-                    {
-                        newList = (List<MyShapeModels>)xs.Deserialize(reader)!;
-                        foreach (MyShapeModels gger in newList)
-                        {
-                            mainWindowViewModel.ShapesOut.Add(gger);
-                            TransformGroup newGroup = new TransformGroup();
-                            RotateTransform newRotate = new RotateTransform();
-                            ScaleTransform newScale = new ScaleTransform();
-                            SkewTransform newSkew = new SkewTransform();
-                            newSkew.AngleX = gger.skewX;
-                            newSkew.AngleY = gger.skewY;
-                            newScale.ScaleX = gger.scaleX;
-                            newScale.ScaleY = gger.scaleY;
-                            newRotate.CenterX = gger.rotX;
-                            newRotate.CenterY = gger.rotY;
-                            newRotate.Angle = gger.rotAngle;
-                            newGroup.Children.Add(newRotate);
-                            newGroup.Children.Add(newScale);
-                            newGroup.Children.Add(newSkew);
-                            if (gger.type == "line")
-                            {
-                                Line newShape = new Line
-                                {
-                                    RenderTransform = newGroup,
-                                    StartPoint = Avalonia.Point.Parse(gger.stp),
-                                    EndPoint = Avalonia.Point.Parse(gger.enp),
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk,
-
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "rectangle")
-                            {
-                                Rectangle newShape = new Rectangle
-                                {
-                                    RenderTransform = newGroup,
-                                    Margin = Avalonia.Thickness.Parse(gger.stp),
-                                    Width = int.Parse(gger.rctheight),
-                                    Height = int.Parse(gger.rctwidth),
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "ellipse")
-                            {
-                                Ellipse newShape = new Ellipse
-                                {
-                                    RenderTransform = newGroup,
-                                    Margin = Avalonia.Thickness.Parse(gger.stp),
-                                    Width = int.Parse(gger.rctheight),
-                                    Height = int.Parse(gger.rctwidth),
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "pthshape")
-                            {
-                                Avalonia.Controls.Shapes.Path newShape = new Avalonia.Controls.Shapes.Path
-                                {
-                                    RenderTransform = newGroup,
-                                    Data = Geometry.Parse(gger.pthdata),
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "polyline")
-                            {
-                                List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
-                                string[] words = gger.plylinetext.Split(' ');
-                                foreach (string word in words)
-                                {
-                                    listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
-                                }
-                                Polyline newShape = new Polyline
-                                {
-                                    RenderTransform = newGroup,
-                                    Points = listOfPolyLinePoints,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                            if (gger.type == "polygon")
-                            {
-                                List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
-                                string[] words = gger.plylinetext.Split(' ');
-                                foreach (string word in words)
-                                {
-                                    listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
-                                }
-                                Polyline newShape = new Polyline
-                                {
-                                    RenderTransform = newGroup,
-                                    Points = listOfPolyLinePoints,
-                                    Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
-                                    Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
-                                    StrokeThickness = gger.strk
-                                };
-                                mainWindowViewModel.ShapesIn.Add(newShape);
-                            }
-                        }
-                    }
+                    OpenXML(result[0], mainWindowViewModel);
                 }
             }
         }
@@ -394,6 +187,242 @@ namespace GraphicEditor.Views
                         canvas.Arrange(new Rect(size));
                         bitmap.Render(canvas);
                         bitmap.Save(result);
+                    }
+                }
+            }
+        }
+        private void OpenXML(string fileName, MainWindowViewModel mainWindowViewModel)
+        {
+            mainWindowViewModel.ShapesOut.Clear();
+            mainWindowViewModel.ShapesIn.Clear();
+            List<MyShapeModels> newList;
+            XmlSerializer xs = new XmlSerializer(typeof(List<MyShapeModels>));
+            using (XmlReader reader = XmlReader.Create(fileName))
+            {
+                newList = (List<MyShapeModels>)xs.Deserialize(reader)!;
+                foreach (MyShapeModels gger in newList)
+                {
+                    mainWindowViewModel.ShapesOut.Add(gger);
+                    TransformGroup newGroup = new TransformGroup();
+                    RotateTransform newRotate = new RotateTransform();
+                    ScaleTransform newScale = new ScaleTransform();
+                    SkewTransform newSkew = new SkewTransform();
+                    newSkew.AngleX = gger.skewX;
+                    newSkew.AngleY = gger.skewY;
+                    newScale.ScaleX = gger.scaleX;
+                    newScale.ScaleY = gger.scaleY;
+                    newRotate.CenterX = gger.rotX;
+                    newRotate.CenterY = gger.rotY;
+                    newRotate.Angle = gger.rotAngle;
+                    newGroup.Children.Add(newRotate);
+                    newGroup.Children.Add(newScale);
+                    newGroup.Children.Add(newSkew);
+                    if (gger.type == "line")
+                    {
+                        Line newShape = new Line
+                        {
+                            RenderTransform = newGroup,
+                            StartPoint = Avalonia.Point.Parse(gger.stp),
+                            EndPoint = Avalonia.Point.Parse(gger.enp),
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk,
+
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "rectangle")
+                    {
+                        Rectangle newShape = new Rectangle
+                        {
+                            RenderTransform = newGroup,
+                            Margin = Avalonia.Thickness.Parse(gger.stp),
+                            Width = int.Parse(gger.rctheight),
+                            Height = int.Parse(gger.rctwidth),
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "ellipse")
+                    {
+                        Ellipse newShape = new Ellipse
+                        {
+                            RenderTransform = newGroup,
+                            Margin = Avalonia.Thickness.Parse(gger.stp),
+                            Width = int.Parse(gger.rctheight),
+                            Height = int.Parse(gger.rctwidth),
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "pthshape")
+                    {
+                        Avalonia.Controls.Shapes.Path newShape = new Avalonia.Controls.Shapes.Path
+                        {
+                            RenderTransform = newGroup,
+                            Data = Geometry.Parse(gger.pthdata),
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "polyline")
+                    {
+                        List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
+                        string[] words = gger.plylinetext.Split(' ');
+                        foreach (string word in words)
+                        {
+                            listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
+                        }
+                        Polyline newShape = new Polyline
+                        {
+                            RenderTransform = newGroup,
+                            Points = listOfPolyLinePoints,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "polygon")
+                    {
+                        List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
+                        string[] words = gger.plylinetext.Split(' ');
+                        foreach (string word in words)
+                        {
+                            listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
+                        }
+                        Polyline newShape = new Polyline
+                        {
+                            RenderTransform = newGroup,
+                            Points = listOfPolyLinePoints,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                }
+            }
+        }
+        private void OpenJSON(string fileName, MainWindowViewModel mainWindowViewModel)
+        {
+            using (FileStream fs = new FileStream(fileName, FileMode.Open))
+            {
+                byte[] buffer = new byte[fs.Length];
+                fs.Read(buffer, 0, buffer.Length);
+                string jsonText = Encoding.Default.GetString(buffer);
+                mainWindowViewModel.ShapesIn.Clear();
+                mainWindowViewModel.ShapesOut.Clear();
+                List<MyShapeModels> newList;
+                newList = JsonSerializer.Deserialize<List<MyShapeModels>>(jsonText)!;
+                foreach (MyShapeModels gger in newList)
+                {
+                    mainWindowViewModel.ShapesOut.Add(gger);
+                    TransformGroup newGroup = new TransformGroup();
+                    RotateTransform newRotate = new RotateTransform();
+                    ScaleTransform newScale = new ScaleTransform();
+                    SkewTransform newSkew = new SkewTransform();
+                    newSkew.AngleX = gger.skewX;
+                    newSkew.AngleY = gger.skewY;
+                    newScale.ScaleX = gger.scaleX;
+                    newScale.ScaleY = gger.scaleY;
+                    newRotate.CenterX = gger.rotX;
+                    newRotate.CenterY = gger.rotY;
+                    newRotate.Angle = gger.rotAngle;
+                    newGroup.Children.Add(newRotate);
+                    newGroup.Children.Add(newScale);
+                    newGroup.Children.Add(newSkew);
+                    if (gger.type == "line")
+                    {
+                        Line newShape = new Line
+                        {
+                            RenderTransform = newGroup,
+                            StartPoint = Avalonia.Point.Parse(gger.stp),
+                            EndPoint = Avalonia.Point.Parse(gger.enp),
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk,
+
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "rectangle")
+                    {
+                        Rectangle newShape = new Rectangle
+                        {
+                            RenderTransform = newGroup,
+                            Margin = Avalonia.Thickness.Parse(gger.stp),
+                            Width = int.Parse(gger.rctheight),
+                            Height = int.Parse(gger.rctwidth),
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "ellipse")
+                    {
+                        Ellipse newShape = new Ellipse
+                        {
+                            RenderTransform = newGroup,
+                            Margin = Avalonia.Thickness.Parse(gger.stp),
+                            Width = int.Parse(gger.rctheight),
+                            Height = int.Parse(gger.rctwidth),
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "pthshape")
+                    {
+                        Avalonia.Controls.Shapes.Path newShape = new Avalonia.Controls.Shapes.Path
+                        {
+                            RenderTransform = newGroup,
+                            Data = Geometry.Parse(gger.pthdata),
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "polyline")
+                    {
+                        List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
+                        string[] words = gger.plylinetext.Split(' ');
+                        foreach (string word in words)
+                        {
+                            listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
+                        }
+                        Polyline newShape = new Polyline
+                        {
+                            RenderTransform = newGroup,
+                            Points = listOfPolyLinePoints,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
+                    }
+                    if (gger.type == "polygon")
+                    {
+                        List<Avalonia.Point> listOfPolyLinePoints = new List<Avalonia.Point>();
+                        string[] words = gger.plylinetext.Split(' ');
+                        foreach (string word in words)
+                        {
+                            listOfPolyLinePoints.Add(Avalonia.Point.Parse(word));
+                        }
+                        Polyline newShape = new Polyline
+                        {
+                            RenderTransform = newGroup,
+                            Points = listOfPolyLinePoints,
+                            Stroke = mainWindowViewModel.ListOfBrushes[gger.brsh].Brush,
+                            Fill = mainWindowViewModel.ListOfBrushes[gger.brsh1].Brush,
+                            StrokeThickness = gger.strk
+                        };
+                        mainWindowViewModel.ShapesIn.Add(newShape);
                     }
                 }
             }
